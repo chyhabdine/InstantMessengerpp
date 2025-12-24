@@ -1,0 +1,17 @@
+﻿bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.log
+*.tmp
+*.cache
+*.ide
+.vscode/
+*.db
+*.sqlite
+*.sqlite3
+*/Migrations/obj/
+*/bin/
+*/obj/
