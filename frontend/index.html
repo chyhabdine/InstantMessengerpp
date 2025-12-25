@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InstantMessengerpp - Web Client</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <div class="page">
+        <header class="topbar">
+            <div class="brand">
+                <div class="dot"></div>
+                <span>InstantMessengerpp</span>
+            </div>
+            <div class="top-actions">
+                <button id="btnShowLogin" class="ghost">Login</button>
+                <button id="btnShowRegister" class="ghost">Register</button>
+                <button id="btnLogout" class="ghost danger">Logout</button>
+            </div>
+        </header>
+
+        <main class="layout">
+            <section class="panel auth" id="authPanel">
+                <h2 id="authTitle">Login</h2>
+                <form id="authForm">
+                    <label>Email
+                        <input type="email" id="authEmail" required />
+                    </label>
+                    <label>Password
+                        <input type="password" id="authPassword" required />
+                    </label>
+                    <label class="register-only">Username
+                        <input type="text" id="authUserName" />
+                    </label>
+                    <label class="register-only">Display Name
+                        <input type="text" id="authDisplayName" />
+                    </label>
+                    <label>Device Name
+                        <input type="text" id="authDevice" placeholder="My laptop" />
+                    </label>
+                    <div class="actions">
+                        <button type="submit" id="authSubmit">Login</button>
+                    </div>
+                    <p class="hint" id="authHint"></p>
+                </form>
+            </section>
+
+            <section class="panel" id="profilePanel">
+                <h2>Profil</h2>
+                <div id="profileInfo" class="stack">
+                    <div><strong>Email:</strong> <span id="profileEmail">-</span></div>
+                    <div><strong>Username:</strong> <span id="profileUserName">-</span></div>
+                    <div><strong>Display:</strong> <span id="profileDisplay">-</span></div>
+                    <div><strong>Status:</strong> <span id="profileStatus">-</span></div>
+                    <div><strong>Presence:</strong> <span id="profilePresence">-</span></div>
+                    <div><strong>Role:</strong> <span id="profileRole">-</span></div>
+                </div>
+                <h3>Modifier mon profil</h3>
+                <form id="profileForm">
+                    <label>Display Name
+                        <input type="text" id="profileDisplayInput" />
+                    </label>
+                    <label>Avatar URL
+                        <input type="url" id="profileAvatarInput" />
+                    </label>
+                    <label>Status Message
+                        <input type="text" id="profileStatusInput" />
+                    </label>
+                    <label>Presence
+                        <select id="profilePresenceInput">
+                            <option value="Online">Online</option>
+                            <option value="Away">Away</option>
+                            <option value="Offline">Offline</option>
+                        </select>
+                    </label>
+                    <div class="actions">
+                        <button type="submit">Save</button>
+                    </div>
+                    <p class="hint" id="profileHint"></p>
+                </form>
+            </section>
+
+            <section class="panel" id="chatsPanel">
+                <div class="panel-header">
+                    <h2>Mes discussions</h2>
+                    <button id="btnRefreshChats" class="ghost">Refresh</button>
+                </div>
+                <div class="chat-list" id="chatList"></div>
+                <h3>Créer une discussion</h3>
+                <form id="chatForm">
+                    <label>Nom
+                        <input type="text" id="chatName" required />
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" id="chatIsGroup" />
+                        <span>Conversation de groupe</span>
+                    </label>
+                    <label>Inviter ces utilisateurs (IDs séparés par des virgules, optionnel)
+                        <input type="text" id="chatMemberIds" placeholder="guid1,guid2" />
+                    </label>
+                    <div class="actions">
+                        <button type="submit">Créer</button>
+                    </div>
+                    <p class="hint" id="chatHint"></p>
+                </form>
+
+                <h3>Ajouter des membres au chat sélectionné</h3>
+                <form id="userSearchForm">
+                    <label>Recherche (email ou username)
+                        <input type="text" id="userSearchInput" placeholder="ex: test" />
+                    </label>
+                    <div class="actions">
+                        <button type="submit" class="ghost">Chercher</button>
+                    </div>
+                </form>
+                <div class="user-list" id="userSearchResults"></div>
+                <p class="hint" id="userSearchHint"></p>
+            </section>
+
+            <section class="panel" id="messagesPanel">
+                <div class="panel-header">
+                    <h2 id="messagesTitle">Messages</h2>
+                    <button id="btnRefreshMessages" class="ghost">Refresh</button>
+                </div>
+                <div class="message-list" id="messageList"></div>
+                <form id="messageForm">
+                    <label>Message
+                        <textarea id="messageContent" rows="3" required></textarea>
+                    </label>
+                    <div class="actions">
+                        <button type="submit">Envoyer</button>
+                    </div>
+                    <p class="hint" id="messageHint"></p>
+                </form>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
