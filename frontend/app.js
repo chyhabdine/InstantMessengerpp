@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:5230/api";
+﻿const API_BASE = "http://localhost:5230/api";
 
 let authMode = "login"; // or "register"
 let authToken = localStorage.getItem("im_token") || "";
@@ -57,8 +57,8 @@ function setAuthMode(mode) {
     els.authTitle.textContent = mode === "login" ? "Login" : "Register";
     els.authSubmit.textContent = mode === "login" ? "Login" : "Register";
     els.authHint.textContent = mode === "login"
-        ? "Pas encore de compte ? Cliquez sur Register."
-        : "Déjà inscrit ? Cliquez sur Login.";
+        ? "No account yet? Click Register."
+        : "Already registered? Click Login.";
 }
 
 function setToken(token) {
@@ -83,7 +83,7 @@ async function apiFetch(path, options = {}) {
         headers
     });
     if (!res.ok) {
-        let msg = `Erreur ${res.status}`;
+        let msg = `Error ${res.status}`;
         try {
             const data = await res.json();
             msg = data?.message || data || msg;
@@ -99,7 +99,7 @@ async function apiFetch(path, options = {}) {
 function renderChats(chats) {
     els.chatList.innerHTML = "";
     if (!chats || chats.length === 0) {
-        els.chatList.innerHTML = "<div class='hint'>Aucune discussion.</div>";
+        els.chatList.innerHTML = "<div class='hint'>No conversations.</div>";
         return;
     }
     chats.forEach(chat => {
@@ -108,9 +108,9 @@ function renderChats(chats) {
         item.innerHTML = `
             <div class="chat-meta">
                 <span>${chat.name}</span>
-                <span>${chat.isGroup ? "Groupe" : "Privé"}</span>
+                <span>${chat.isGroup ? "Group" : "Private"}</span>
             </div>
-            <div class="hint">${chat.members.length} membre(s)</div>
+            <div class="hint">${chat.members.length} member(s)</div>
         `;
         item.onclick = () => {
             currentChatId = chat.id;
@@ -124,7 +124,7 @@ function renderChats(chats) {
 function renderMessages(messages) {
     els.messageList.innerHTML = "";
     if (!messages || messages.length === 0) {
-        els.messageList.innerHTML = "<div class='hint'>Aucun message.</div>";
+        els.messageList.innerHTML = "<div class='hint'>No messages.</div>";
         return;
     }
     messages.forEach(msg => {
@@ -173,7 +173,7 @@ async function loadChats() {
 
 async function loadMessages(chatId) {
     if (!chatId) {
-        els.messageList.innerHTML = "<div class='hint'>Sélectionnez une discussion.</div>";
+        els.messageList.innerHTML = "<div class='hint'>Select a conversation.</div>";
         return;
     }
     els.messagesTitle.textContent = "Messages - " + chatId;
@@ -186,7 +186,7 @@ async function loadMessages(chatId) {
 }
 
 async function searchUsers(term) {
-    els.userSearchResults.innerHTML = "<div class='hint'>Recherche...</div>";
+    els.userSearchResults.innerHTML = "<div class='hint'>Searching...</div>";
     try {
         const users = await apiFetch(`/users?search=${encodeURIComponent(term || "")}`);
         renderUserSearch(users);
@@ -199,7 +199,7 @@ async function searchUsers(term) {
 function renderUserSearch(users) {
     els.userSearchResults.innerHTML = "";
     if (!users || users.length === 0) {
-        els.userSearchResults.innerHTML = "<div class='hint'>Aucun résultat.</div>";
+        els.userSearchResults.innerHTML = "<div class='hint'>No results.</div>";
         return;
     }
     users.forEach(u => {
@@ -214,7 +214,7 @@ function renderUserSearch(users) {
         `;
         const btn = document.createElement("button");
         btn.className = "ghost";
-        btn.textContent = "Ajouter au chat";
+        btn.textContent = "Add to chat";
         btn.onclick = () => addUserToCurrentChat(u.userId);
         item.appendChild(btn);
         els.userSearchResults.appendChild(item);
@@ -223,16 +223,16 @@ function renderUserSearch(users) {
 
 async function addUserToCurrentChat(userId) {
     if (!currentChatId) {
-        els.userSearchHint.textContent = "Sélectionnez un chat avant d'ajouter un membre.";
+        els.userSearchHint.textContent = "Select a chat before adding a member.";
         return;
     }
-    els.userSearchHint.textContent = "Ajout...";
+    els.userSearchHint.textContent = "Adding...";
     try {
         await apiFetch(`/chats/${currentChatId}/members`, {
             method: "POST",
             body: JSON.stringify({ userId, role: "Member" })
         });
-        els.userSearchHint.textContent = "Membre ajouté.";
+        els.userSearchHint.textContent = "Member added.";
         await loadChats();
     } catch (err) {
         els.userSearchHint.textContent = err.message;
@@ -265,7 +265,7 @@ els.btnLogout.onclick = logout;
 
 els.authForm.onsubmit = async (e) => {
     e.preventDefault();
-    els.authHint.textContent = "En cours...";
+    els.authHint.textContent = "In progress...";
     const body = {
         email: els.authEmail.value.trim(),
         password: els.authPassword.value.trim(),
@@ -282,7 +282,7 @@ els.authForm.onsubmit = async (e) => {
             body: JSON.stringify(body)
         });
         setToken(res.accessToken);
-        els.authHint.textContent = authMode === "login" ? "Connecté." : "Compte créé, connecté.";
+        els.authHint.textContent = authMode === "login" ? "Connected." : "Account created, connected.";
         await loadProfile();
         await loadChats();
     } catch (err) {
@@ -292,7 +292,7 @@ els.authForm.onsubmit = async (e) => {
 
 els.profileForm.onsubmit = async (e) => {
     e.preventDefault();
-    els.profileHint.textContent = "Enregistrement...";
+    els.profileHint.textContent = "Saving...";
     try {
         await apiFetch("/users/me/profile", {
             method: "PUT",
@@ -303,7 +303,7 @@ els.profileForm.onsubmit = async (e) => {
                 presence: els.profilePresenceInput.value
             })
         });
-        els.profileHint.textContent = "Profil mis à jour.";
+        els.profileHint.textContent = "Profile updated.";
         await loadProfile();
     } catch (err) {
         els.profileHint.textContent = err.message;
@@ -312,7 +312,7 @@ els.profileForm.onsubmit = async (e) => {
 
 els.chatForm.onsubmit = async (e) => {
     e.preventDefault();
-    els.chatHint.textContent = "Création...";
+    els.chatHint.textContent = "Creating...";
     try {
         const memberIds = (els.chatMemberIds.value || "")
             .split(",")
@@ -326,7 +326,7 @@ els.chatForm.onsubmit = async (e) => {
                 memberIds
             })
         });
-        els.chatHint.textContent = "Discussion créée.";
+        els.chatHint.textContent = "Conversation created.";
         els.chatName.value = "";
         els.chatMemberIds.value = "";
         currentChatId = chat.id;
@@ -341,7 +341,7 @@ els.messageForm.onsubmit = async (e) => {
     e.preventDefault();
     els.messageHint.textContent = "";
     if (!currentChatId) {
-        els.messageHint.textContent = "Sélectionnez une discussion.";
+        els.messageHint.textContent = "Select a conversation.";
         return;
     }
     try {
@@ -375,3 +375,5 @@ if (authToken) {
     loadProfile();
     loadChats();
 }
+
+

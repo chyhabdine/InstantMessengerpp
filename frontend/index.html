@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -47,7 +47,7 @@
             </section>
 
             <section class="panel" id="profilePanel">
-                <h2>Profil</h2>
+                <h2>Profile</h2>
                 <div id="profileInfo" class="stack">
                     <div><strong>Email:</strong> <span id="profileEmail">-</span></div>
                     <div><strong>Username:</strong> <span id="profileUserName">-</span></div>
@@ -56,7 +56,7 @@
                     <div><strong>Presence:</strong> <span id="profilePresence">-</span></div>
                     <div><strong>Role:</strong> <span id="profileRole">-</span></div>
                 </div>
-                <h3>Modifier mon profil</h3>
+                <h3>Update my profile</h3>
                 <form id="profileForm">
                     <label>Display Name
                         <input type="text" id="profileDisplayInput" />
@@ -83,35 +83,35 @@
 
             <section class="panel" id="chatsPanel">
                 <div class="panel-header">
-                    <h2>Mes discussions</h2>
+                    <h2>My conversations</h2>
                     <button id="btnRefreshChats" class="ghost">Refresh</button>
                 </div>
                 <div class="chat-list" id="chatList"></div>
-                <h3>Créer une discussion</h3>
+                <h3>Create a conversation</h3>
                 <form id="chatForm">
-                    <label>Nom
+                    <label>Name
                         <input type="text" id="chatName" required />
                     </label>
                     <label class="checkbox">
                         <input type="checkbox" id="chatIsGroup" />
-                        <span>Conversation de groupe</span>
+                        <span>Group conversation</span>
                     </label>
-                    <label>Inviter ces utilisateurs (IDs séparés par des virgules, optionnel)
+                    <label>Invite these users (IDs separated by commas, optional)
                         <input type="text" id="chatMemberIds" placeholder="guid1,guid2" />
                     </label>
                     <div class="actions">
-                        <button type="submit">Créer</button>
+                        <button type="submit">Create</button>
                     </div>
                     <p class="hint" id="chatHint"></p>
                 </form>
 
-                <h3>Ajouter des membres au chat sélectionné</h3>
+                <h3>Add members to the selected chat</h3>
                 <form id="userSearchForm">
-                    <label>Recherche (email ou username)
-                        <input type="text" id="userSearchInput" placeholder="ex: test" />
+                    <label>Search (email or username)
+                        <input type="text" id="userSearchInput" placeholder="e.g. test" />
                     </label>
                     <div class="actions">
-                        <button type="submit" class="ghost">Chercher</button>
+                        <button type="submit" class="ghost">Search</button>
                     </div>
                 </form>
                 <div class="user-list" id="userSearchResults"></div>
@@ -129,7 +129,7 @@
                         <textarea id="messageContent" rows="3" required></textarea>
                     </label>
                     <div class="actions">
-                        <button type="submit">Envoyer</button>
+                        <button type="submit">Send</button>
                     </div>
                     <p class="hint" id="messageHint"></p>
                 </form>
@@ -139,3 +139,5 @@
     <script src="app.js"></script>
 </body>
 </html>
+
+
