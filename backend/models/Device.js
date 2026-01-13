@@ -1,29 +1,28 @@
 module.exports = (sequelize, DataTypes) => {
     return sequelize.define(
-        "Conversation",
+        "Device",
         {
             id: {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
                 primaryKey: true
             },
+            userId: {
+                type: DataTypes.UUID,
+                allowNull: false
+            },
             name: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            isGroup: {
-                type: DataTypes.BOOLEAN,
-                allowNull: false,
-                defaultValue: false
-            },
-            lastMessageId: {
-                type: DataTypes.UUID,
+            lastSeenAt: {
+                type: DataTypes.DATE,
                 allowNull: true
             }
         },
         {
-            tableName: "conversations",
-            timestamps: true
+            tableName: "devices",
+            timestamps: false
         }
     );
 };

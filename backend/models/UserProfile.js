@@ -1,29 +1,16 @@
 module.exports = (sequelize, DataTypes) => {
     return sequelize.define(
-        "User",
+        "UserProfile",
         {
             id: {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
                 primaryKey: true
             },
-            userName: {
-                type: DataTypes.STRING,
+            userId: {
+                type: DataTypes.UUID,
                 allowNull: false,
                 unique: true
-            },
-            email: {
-                type: DataTypes.STRING,
-                allowNull: false,
-                unique: true
-            },
-            passwordHash: {
-                type: DataTypes.STRING,
-                allowNull: false
-            },
-            passwordSalt: {
-                type: DataTypes.STRING,
-                allowNull: false
             },
             displayName: {
                 type: DataTypes.STRING,
@@ -39,15 +26,6 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
                 defaultValue: "Online"
             },
-            role: {
-                type: DataTypes.STRING,
-                allowNull: false,
-                defaultValue: "User"
-            },
-            roleId: {
-                type: DataTypes.UUID,
-                allowNull: true
-            },
             avatarUrl: {
                 type: DataTypes.STRING,
                 allowNull: false,
@@ -55,8 +33,8 @@ module.exports = (sequelize, DataTypes) => {
             }
         },
         {
-            tableName: "users",
-            timestamps: true
+            tableName: "user_profiles",
+            timestamps: false
         }
     );
 };

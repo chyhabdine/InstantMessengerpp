@@ -1,12 +1,13 @@
 # Business Rules
 
-- **Identité unique** — email et username sont uniques ; les doublons sont rejetés.
-- **Rôles** — rôles Admin et User ; un nouvel utilisateur est User par défaut.
-- **Présence** — l’activité d’un device met à jour la présence de l’utilisateur/profil.
-- **Amitié** — impossible de s’auto-inviter ; une demande en attente est unique par paire ; seul le destinataire accepte/refuse.
-- **Chat membership** — seul un membre peut envoyer un message ; un membre a un rôle (Owner/Admin/Member) pour les droits du salon.
-- **Chats privés** — exactement deux membres ; les groupes peuvent en avoir plusieurs.
-- **Notifications** — créées pour nouveaux messages et demandes d’ami ; marquage lu/non-lu.
-- **Sessions** — les refresh tokens expirent après la durée configurée ; un token expiré/invalidé est refusé.
-- **Pièces jointes** — stockées en métadonnées (URL + infos de contenu) ; la propriété est tracée.
-- **Réactions** — un utilisateur a une seule réaction par message ; réagir à nouveau met à jour la précédente.
+- **Unique identity** ??? email and username are unique; duplicates are rejected.
+- **Roles** ??? Admin and User roles exist; a new user is User by default.
+- **Presence** ??? device activity updates the user/profile presence.
+- **Friendship** ??? users cannot invite themselves; a pending request is unique per pair; only the receiver can accept or reject.
+- **Chat membership** ??? only members can send messages; members have a role (Owner/Admin/Member) for permissions.
+- **Private chats** ??? exactly two members; groups can have multiple members.
+- **Notifications** ??? created for new messages and friend requests; read/unread state is tracked.
+- **Sessions** ??? refresh tokens expire after the configured duration; expired/invalid tokens are rejected.
+- **Attachments** ??? stored as metadata (URL + content info); ownership is tracked.
+- **Reactions** ??? one reaction per user per message; reacting again updates the previous one.
+

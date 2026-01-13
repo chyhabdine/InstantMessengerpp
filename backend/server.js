@@ -1,14 +1,24 @@
+require("dotenv").config();
 const http = require("http");
 const { URL } = require("url");
 const crypto = require("crypto");
-const { loadData, saveData } = require("./config/database");
+const { initDatabase, models } = require("./config/database");
 const registerAuthRoutes = require("./routes/auth.routes");
 const registerUserRoutes = require("./routes/users.routes");
 const registerMessageRoutes = require("./routes/messages.routes");
+const registerAdminRoutes = require("./routes/admin.routes");
+const UserRepository = require("./repositories/user.repository");
+const ConversationRepository = require("./repositories/conversation.repository");
+const MessageRepository = require("./repositories/message.repository");
+const SessionRepository = require("./repositories/session.repository");
+const DeviceRepository = require("./repositories/device.repository");
+const AuthService = require("./services/auth.service");
+const UserService = require("./services/user.service");
+const ChatService = require("./services/chat.service");
+const MessageService = require("./services/message.service");
+const AdminService = require("./services/admin.service");
 
 const PORT = 5230;
-const data = loadData();
-const tokens = new Map();
 
 const apiEndpoints = [
     "POST /api/auth/register",
@@ -20,7 +30,8 @@ const apiEndpoints = [
     "POST /api/chats",
     "POST /api/chats/:id/members",
     "GET /api/chats/:id/messages",
-    "POST /api/chats/:id/messages"
+    "POST /api/chats/:id/messages",
+    "CRUD /api/admin/{entity}"
 ];
 
 function json(res, status, dataResponse) {
@@ -29,19 +40,9 @@ function json(res, status, dataResponse) {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS"
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS"
     });
     res.end(body);
-}
-
-function text(res, status, payload) {
-    res.writeHead(status, {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS"
-    });
-    res.end(payload);
 }
 
 function badRequest(res, message) {
@@ -64,7 +65,7 @@ function noContent(res) {
     res.writeHead(204, {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS"
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS"
     });
     res.end();
 }
@@ -102,30 +103,6 @@ function sanitizeProfile(user) {
         role: user.role || "User",
         avatarUrl: user.avatarUrl || ""
     };
-}
-
-function getAuthUser(req, res) {
-    const authHeader = req.headers.authorization || "";
-    if (!authHeader.startsWith("Bearer ")) {
-        unauthorized(res, "Missing or invalid access token.");
-        return null;
-    }
-    const token = authHeader.slice("Bearer ".length).trim();
-    const userId = tokens.get(token);
-    if (!userId) {
-        unauthorized(res, "Invalid or expired access token.");
-        return null;
-    }
-    const user = data.users.find(u => u.id === userId);
-    if (!user) {
-        unauthorized(res, "Invalid access token.");
-        return null;
-    }
-    return user;
-}
-
-function save() {
-    saveData(data);
 }
 
 function createRouter() {
@@ -166,58 +143,105 @@ function createRouter() {
     return { add, match, extractParams };
 }
 
-const router = createRouter();
-const ctx = {
-    data,
-    tokens,
-    json,
-    text,
-    badRequest,
-    unauthorized,
-    notFound,
-    conflict,
-    noContent,
-    readBody,
-    newId,
-    sanitizeProfile,
-    getAuthUser,
-    save
-};
+async function startServer() {
+    await initDatabase();
 
-registerAuthRoutes(router, ctx);
-registerUserRoutes(router, ctx);
-registerMessageRoutes(router, ctx);
+    const repositories = {
+        users: new UserRepository(models),
+        conversations: new ConversationRepository(models),
+        messages: new MessageRepository(models),
+        sessions: new SessionRepository(models),
+        devices: new DeviceRepository(models)
+    };
 
-const server = http.createServer(async (req, res) => {
-    if (req.method === "OPTIONS") {
-        return noContent(res);
-    }
+    const services = {
+        auth: new AuthService({
+            userRepository: repositories.users,
+            sessionRepository: repositories.sessions,
+            deviceRepository: repositories.devices
+        }),
+        users: new UserService({ userRepository: repositories.users }),
+        chats: new ChatService({
+            conversationRepository: repositories.conversations,
+            userRepository: repositories.users
+        }),
+        messages: new MessageService({
+            messageRepository: repositories.messages,
+            conversationRepository: repositories.conversations,
+            userRepository: repositories.users
+        }),
+        admin: new AdminService(models)
+    };
 
-    const url = new URL(req.url, `http://${req.headers.host}`);
-    const pathname = url.pathname;
+    const router = createRouter();
+    const ctx = {
+        json,
+        badRequest,
+        unauthorized,
+        notFound,
+        conflict,
+        noContent,
+        readBody,
+        newId,
+        sanitizeProfile,
+        services,
+        getAuthUser: async (req, res) => {
+            const authHeader = req.headers.authorization || "";
+            if (!authHeader.startsWith("Bearer ")) {
+                unauthorized(res, "Missing or invalid access token.");
+                return null;
+            }
+            const token = authHeader.slice("Bearer ".length).trim();
+            const user = await services.auth.getUserByToken(token);
+            if (!user) {
+                unauthorized(res, "Invalid or expired access token.");
+                return null;
+            }
+            return user;
+        }
+    };
 
-    if (req.method === "GET" && (pathname === "/" || pathname === "/api")) {
-        return json(res, 200, {
-            message: "Backend is running - available endpoints.",
-            endpoints: apiEndpoints
-        });
-    }
+    registerAuthRoutes(router, ctx);
+    registerUserRoutes(router, ctx);
+    registerMessageRoutes(router, ctx);
+    registerAdminRoutes(router, ctx);
 
-    const route = router.match(req.method, pathname);
-    if (!route) {
-        return notFound(res, "Endpoint not found.");
-    }
+    const server = http.createServer(async (req, res) => {
+        if (req.method === "OPTIONS") {
+            return noContent(res);
+        }
 
-    try {
-        req.query = Object.fromEntries(url.searchParams.entries());
-        req.params = router.extractParams(route, pathname);
-        req.body = await readBody(req);
-        return route.handler(req, res);
-    } catch (err) {
-        return badRequest(res, "Invalid JSON payload.");
-    }
-});
+        const url = new URL(req.url, `http://${req.headers.host}`);
+        const pathname = url.pathname;
 
-server.listen(PORT, () => {
-    console.log(`InstantMessenger backend running at http://localhost:${PORT}`);
+        if (req.method === "GET" && (pathname === "/" || pathname === "/api")) {
+            return json(res, 200, {
+                message: "Backend is running - available endpoints.",
+                endpoints: apiEndpoints
+            });
+        }
+
+        const route = router.match(req.method, pathname);
+        if (!route) {
+            return notFound(res, "Endpoint not found.");
+        }
+
+        try {
+            req.query = Object.fromEntries(url.searchParams.entries());
+            req.params = router.extractParams(route, pathname);
+            req.body = await readBody(req);
+            return await route.handler(req, res);
+        } catch (err) {
+            return badRequest(res, "Invalid JSON payload.");
+        }
+    });
+
+    server.listen(PORT, () => {
+        console.log(`InstantMessenger backend running at http://localhost:${PORT}`);
+    });
+}
+
+startServer().catch(err => {
+    console.error("Backend failed to start:", err.message);
+    process.exit(1);
 });

@@ -134,6 +134,44 @@
                     <p class="hint" id="messageHint"></p>
                 </form>
             </section>
+
+            <section class="panel" id="adminPanel">
+                <div class="panel-header">
+                    <h2>Admin Console</h2>
+                    <button id="btnRefreshAdmin" class="ghost">Refresh</button>
+                </div>
+                <form id="adminForm">
+                    <label>Entity
+                        <select id="adminEntity">
+                            <option value="users">Users</option>
+                            <option value="roles">Roles</option>
+                            <option value="profiles">User Profiles</option>
+                            <option value="sessions">Sessions</option>
+                            <option value="devices">Devices</option>
+                            <option value="conversations">Conversations</option>
+                            <option value="chat_members">Chat Members</option>
+                            <option value="messages">Messages</option>
+                            <option value="attachments">Attachments</option>
+                            <option value="reactions">Reactions</option>
+                            <option value="friend_requests">Friend Requests</option>
+                            <option value="notifications">Notifications</option>
+                        </select>
+                    </label>
+                    <label>Record Id
+                        <input type="text" id="adminRecordId" placeholder="id" />
+                    </label>
+                    <label>Payload (JSON)
+                        <textarea id="adminPayload" rows="6" placeholder="{ }"></textarea>
+                    </label>
+                    <div class="actions">
+                        <button type="button" id="adminCreate">Create</button>
+                        <button type="button" id="adminUpdate" class="ghost">Update</button>
+                        <button type="button" id="adminDelete" class="ghost danger">Delete</button>
+                    </div>
+                    <p class="hint" id="adminHint"></p>
+                </form>
+                <div class="admin-list" id="adminList"></div>
+            </section>
         </main>
     </div>
     <script src="app.js"></script>

@@ -1,7 +1,8 @@
-# Roadmap Finale (OOP Lab)
+# Final Roadmap (OOP Lab)
 
-- **M1: Backend prêt** — Modélisation EF Core, migrations, seed (admin), JWT auth, API REST (users, chats, messages, reactions, amis, notifications). ✅
-- **M2: Données & intégrité** — 10+ entités réelles, index/contraintes (unicité email/username, clé composite chat-member, FK cascades/Restrict), règles métier appliquées. ✅
-- **M3: Frontend web** — Client web minimal (login/register, liste de chats, fenêtre de chat, profil, envoi de messages) connecté à l'API. ✅
-- **M4: Qualité & docs** — README complet, rôles d'équipe, use cases, ERD, business rules, instructions de run (PostgreSQL, dotnet, frontend). ✅
-- **M5: Soutenance** — Démo via Swagger + client web, explication architecture et choix, cas limites (auth, membres, intégrité DB), préparation questions (scalabilité, rôles, travail en équipe). ⏩
+- **M1: Backend ready** ??? Sequelize models, database setup, JWT-style access tokens, REST API (users, chats, messages, reactions, friends, notifications).
+- **M2: Data integrity** ??? 10+ real entities, indexes/constraints (unique email/username, composite chat-member, FK behavior), business rules enforced.
+- **M3: Web frontend** ??? minimal web client (login/register, chat list, chat window, profile, message sending) connected to the API.
+- **M4: Quality & docs** ??? complete README, team roles, use cases, ERD, business rules, run instructions (PostgreSQL, Node.js, frontend).
+- **M5: Defense** ??? demo via API + web client, architecture explanation, DB integrity edge cases, scalability and team roles.
+

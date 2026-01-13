@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
     return sequelize.define(
-        "Conversation",
+        "Role",
         {
             id: {
                 type: DataTypes.UUID,
@@ -9,21 +9,13 @@ module.exports = (sequelize, DataTypes) => {
             },
             name: {
                 type: DataTypes.STRING,
-                allowNull: false
-            },
-            isGroup: {
-                type: DataTypes.BOOLEAN,
                 allowNull: false,
-                defaultValue: false
-            },
-            lastMessageId: {
-                type: DataTypes.UUID,
-                allowNull: true
+                unique: true
             }
         },
         {
-            tableName: "conversations",
-            timestamps: true
+            tableName: "roles",
+            timestamps: false
         }
     );
 };

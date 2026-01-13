@@ -1,28 +1,32 @@
 module.exports = (sequelize, DataTypes) => {
     return sequelize.define(
-        "Conversation",
+        "Notification",
         {
             id: {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
                 primaryKey: true
             },
-            name: {
+            userId: {
+                type: DataTypes.UUID,
+                allowNull: false
+            },
+            type: {
                 type: DataTypes.STRING,
                 allowNull: false
             },
-            isGroup: {
+            payload: {
+                type: DataTypes.TEXT,
+                allowNull: false
+            },
+            isRead: {
                 type: DataTypes.BOOLEAN,
                 allowNull: false,
                 defaultValue: false
-            },
-            lastMessageId: {
-                type: DataTypes.UUID,
-                allowNull: true
             }
         },
         {
-            tableName: "conversations",
+            tableName: "notifications",
             timestamps: true
         }
     );

@@ -45,7 +45,16 @@ const els = {
     userSearchForm: document.getElementById("userSearchForm"),
     userSearchInput: document.getElementById("userSearchInput"),
     userSearchResults: document.getElementById("userSearchResults"),
-    userSearchHint: document.getElementById("userSearchHint")
+    userSearchHint: document.getElementById("userSearchHint"),
+    adminEntity: document.getElementById("adminEntity"),
+    adminRecordId: document.getElementById("adminRecordId"),
+    adminPayload: document.getElementById("adminPayload"),
+    adminCreate: document.getElementById("adminCreate"),
+    adminUpdate: document.getElementById("adminUpdate"),
+    adminDelete: document.getElementById("adminDelete"),
+    adminList: document.getElementById("adminList"),
+    adminHint: document.getElementById("adminHint"),
+    btnRefreshAdmin: document.getElementById("btnRefreshAdmin")
 };
 
 function setAuthMode(mode) {
@@ -239,6 +248,115 @@ async function addUserToCurrentChat(userId) {
     }
 }
 
+function getAdminEntity() {
+    return els.adminEntity.value;
+}
+
+function getAdminRecordId() {
+    return els.adminRecordId.value.trim();
+}
+
+function parseAdminPayload() {
+    const raw = els.adminPayload.value.trim();
+    if (!raw) return {};
+    try {
+        return JSON.parse(raw);
+    } catch (err) {
+        throw new Error("Invalid JSON payload.");
+    }
+}
+
+function renderAdminList(items) {
+    els.adminList.innerHTML = "";
+    if (!items || items.length === 0) {
+        els.adminList.innerHTML = "<div class='hint'>No records.</div>";
+        return;
+    }
+    items.forEach(item => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "admin-item";
+        const pre = document.createElement("pre");
+        pre.textContent = JSON.stringify(item, null, 2);
+        const btn = document.createElement("button");
+        btn.className = "ghost";
+        btn.textContent = "Use";
+        btn.onclick = () => {
+            els.adminRecordId.value = item.id || "";
+            els.adminPayload.value = JSON.stringify(item, null, 2);
+        };
+        wrapper.appendChild(pre);
+        wrapper.appendChild(btn);
+        els.adminList.appendChild(wrapper);
+    });
+}
+
+async function loadAdminList() {
+    els.adminHint.textContent = "";
+    try {
+        const entity = getAdminEntity();
+        const items = await apiFetch(`/admin/${entity}`);
+        renderAdminList(items);
+    } catch (err) {
+        els.adminHint.textContent = err.message;
+    }
+}
+
+async function createAdminItem() {
+    els.adminHint.textContent = "";
+    try {
+        const entity = getAdminEntity();
+        const payload = parseAdminPayload();
+        await apiFetch(`/admin/${entity}`, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+        els.adminHint.textContent = "Created.";
+        await loadAdminList();
+    } catch (err) {
+        els.adminHint.textContent = err.message;
+    }
+}
+
+async function updateAdminItem() {
+    els.adminHint.textContent = "";
+    const recordId = getAdminRecordId();
+    if (!recordId) {
+        els.adminHint.textContent = "Record id is required.";
+        return;
+    }
+    try {
+        const entity = getAdminEntity();
+        const payload = parseAdminPayload();
+        await apiFetch(`/admin/${entity}/${recordId}`, {
+            method: "PUT",
+            body: JSON.stringify(payload)
+        });
+        els.adminHint.textContent = "Updated.";
+        await loadAdminList();
+    } catch (err) {
+        els.adminHint.textContent = err.message;
+    }
+}
+
+async function deleteAdminItem() {
+    els.adminHint.textContent = "";
+    const recordId = getAdminRecordId();
+    if (!recordId) {
+        els.adminHint.textContent = "Record id is required.";
+        return;
+    }
+    try {
+        const entity = getAdminEntity();
+        await apiFetch(`/admin/${entity}/${recordId}`, {
+            method: "DELETE"
+        });
+        els.adminHint.textContent = "Deleted.";
+        await loadAdminList();
+    } catch (err) {
+        els.adminHint.textContent = err.message;
+    }
+}
+
 function resetAuthForms() {
     els.authEmail.value = "";
     els.authPassword.value = "";
@@ -285,6 +403,7 @@ els.authForm.onsubmit = async (e) => {
         els.authHint.textContent = authMode === "login" ? "Connected." : "Account created, connected.";
         await loadProfile();
         await loadChats();
+        await loadAdminList();
     } catch (err) {
         els.authHint.textContent = err.message;
     }
@@ -368,12 +487,17 @@ els.userSearchForm.onsubmit = (e) => {
     els.userSearchHint.textContent = "";
     searchUsers(els.userSearchInput.value.trim());
 };
+els.btnRefreshAdmin.onclick = () => loadAdminList();
+els.adminCreate.onclick = () => createAdminItem();
+els.adminUpdate.onclick = () => updateAdminItem();
+els.adminDelete.onclick = () => deleteAdminItem();
 
 // Init
 setAuthMode(authMode);
 if (authToken) {
     loadProfile();
     loadChats();
+    loadAdminList();
 }
 
 

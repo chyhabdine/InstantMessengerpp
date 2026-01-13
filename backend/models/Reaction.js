@@ -1,36 +1,34 @@
 module.exports = (sequelize, DataTypes) => {
     return sequelize.define(
-        "Message",
+        "Reaction",
         {
             id: {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
                 primaryKey: true
             },
-            senderId: {
+            messageId: {
                 type: DataTypes.UUID,
                 allowNull: false
             },
-            receiverId: {
-                type: DataTypes.UUID,
-                allowNull: true
-            },
-            conversationId: {
+            userId: {
                 type: DataTypes.UUID,
                 allowNull: false
             },
-            content: {
-                type: DataTypes.TEXT,
-                allowNull: false
-            },
-            timestamp: {
-                type: DataTypes.DATE,
+            emoji: {
+                type: DataTypes.STRING,
                 allowNull: false
             }
         },
         {
-            tableName: "messages",
-            timestamps: false
+            tableName: "reactions",
+            timestamps: false,
+            indexes: [
+                {
+                    unique: true,
+                    fields: ["messageId", "userId"]
+                }
+            ]
         }
     );
 };

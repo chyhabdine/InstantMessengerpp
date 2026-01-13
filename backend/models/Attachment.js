@@ -1,35 +1,35 @@
 module.exports = (sequelize, DataTypes) => {
     return sequelize.define(
-        "Message",
+        "Attachment",
         {
             id: {
                 type: DataTypes.UUID,
                 defaultValue: DataTypes.UUIDV4,
                 primaryKey: true
             },
-            senderId: {
+            messageId: {
                 type: DataTypes.UUID,
                 allowNull: false
             },
-            receiverId: {
-                type: DataTypes.UUID,
-                allowNull: true
-            },
-            conversationId: {
-                type: DataTypes.UUID,
+            url: {
+                type: DataTypes.STRING,
                 allowNull: false
             },
-            content: {
-                type: DataTypes.TEXT,
+            fileName: {
+                type: DataTypes.STRING,
                 allowNull: false
             },
-            timestamp: {
-                type: DataTypes.DATE,
+            mimeType: {
+                type: DataTypes.STRING,
+                allowNull: false
+            },
+            size: {
+                type: DataTypes.INTEGER,
                 allowNull: false
             }
         },
         {
-            tableName: "messages",
+            tableName: "attachments",
             timestamps: false
         }
     );
