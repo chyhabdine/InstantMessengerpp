@@ -7,9 +7,9 @@ Instant messaging web application (client-server) with a Node.js backend + Postg
 - Clean architecture with controllers, services, repositories, and a PostgreSQL-backed ORM (Sequelize).
 
 ## Team Roles
-- **ABDOULAYE Chyhab-Dine** ??? Backend Developer, Database Engineer, DevOps.
-- **OBOSSOU Leman** ??? Frontend Developer, UX/UI Designer, Backend Developer.
-- **AFOLABI Loveth** ??? Project Manager, System/Business Analyst, Documentation & Roadmap.
+- **ABDOULAYE Chyhab-Dine:Backend Developer, Database Engineer, DevOps.
+- **OBOSSOU Leman:Frontend Developer, UX/UI Designer, Backend Developer.
+- **AFOLABI Loveth:Project Manager, System/Business Analyst, Documentation & Roadmap.
 
 ## Functional Scope
 - Authentication/registration, device sessions, Admin/User roles.
