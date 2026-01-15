@@ -38,6 +38,22 @@ DATABASE_URL=postgres://postgres:postgres@localhost:5432/instantmessenger
 - `POST /api/chats/{id}/members`
 - `GET /api/chats/{id}/messages`
 - `POST /api/chats/{id}/messages`
+- `GET /api/messages/{id}/attachments`
+- `POST /api/messages/{id}/attachments`
+- `PUT /api/attachments/{id}`
+- `DELETE /api/attachments/{id}`
+- `GET /api/messages/{id}/reactions`
+- `POST /api/messages/{id}/reactions`
+- `PUT /api/reactions/{id}`
+- `DELETE /api/reactions/{id}`
+- `GET /api/friends/requests`
+- `POST /api/friends/requests`
+- `PUT /api/friends/requests/{id}`
+- `DELETE /api/friends/requests/{id}`
+- `GET /api/notifications`
+- `POST /api/notifications`
+- `PUT /api/notifications/{id}`
+- `DELETE /api/notifications/{id}`
 
 ## Admin CRUD
 Generic CRUD endpoints for all entities:

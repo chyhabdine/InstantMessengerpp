@@ -7,16 +7,28 @@ const registerAuthRoutes = require("./routes/auth.routes");
 const registerUserRoutes = require("./routes/users.routes");
 const registerMessageRoutes = require("./routes/messages.routes");
 const registerAdminRoutes = require("./routes/admin.routes");
+const registerAttachmentRoutes = require("./routes/attachments.routes");
+const registerReactionRoutes = require("./routes/reactions.routes");
+const registerFriendRequestRoutes = require("./routes/friend-requests.routes");
+const registerNotificationRoutes = require("./routes/notifications.routes");
 const UserRepository = require("./repositories/user.repository");
 const ConversationRepository = require("./repositories/conversation.repository");
 const MessageRepository = require("./repositories/message.repository");
 const SessionRepository = require("./repositories/session.repository");
 const DeviceRepository = require("./repositories/device.repository");
+const AttachmentRepository = require("./repositories/attachment.repository");
+const ReactionRepository = require("./repositories/reaction.repository");
+const FriendRequestRepository = require("./repositories/friend-request.repository");
+const NotificationRepository = require("./repositories/notification.repository");
 const AuthService = require("./services/auth.service");
 const UserService = require("./services/user.service");
 const ChatService = require("./services/chat.service");
 const MessageService = require("./services/message.service");
 const AdminService = require("./services/admin.service");
+const AttachmentService = require("./services/attachment.service");
+const ReactionService = require("./services/reaction.service");
+const FriendRequestService = require("./services/friend-request.service");
+const NotificationService = require("./services/notification.service");
 
 const PORT = 5230;
 
@@ -31,6 +43,10 @@ const apiEndpoints = [
     "POST /api/chats/:id/members",
     "GET /api/chats/:id/messages",
     "POST /api/chats/:id/messages",
+    "CRUD /api/messages/:id/attachments",
+    "CRUD /api/messages/:id/reactions",
+    "CRUD /api/friends/requests",
+    "CRUD /api/notifications",
     "CRUD /api/admin/{entity}"
 ];
 
@@ -151,7 +167,11 @@ async function startServer() {
         conversations: new ConversationRepository(models),
         messages: new MessageRepository(models),
         sessions: new SessionRepository(models),
-        devices: new DeviceRepository(models)
+        devices: new DeviceRepository(models),
+        attachments: new AttachmentRepository(models),
+        reactions: new ReactionRepository(models),
+        friendRequests: new FriendRequestRepository(models),
+        notifications: new NotificationRepository(models)
     };
 
     const services = {
@@ -168,6 +188,27 @@ async function startServer() {
         messages: new MessageService({
             messageRepository: repositories.messages,
             conversationRepository: repositories.conversations,
+            userRepository: repositories.users,
+            attachmentRepository: repositories.attachments,
+            notificationRepository: repositories.notifications
+        }),
+        attachments: new AttachmentService({
+            attachmentRepository: repositories.attachments,
+            messageRepository: repositories.messages,
+            conversationRepository: repositories.conversations
+        }),
+        reactions: new ReactionService({
+            reactionRepository: repositories.reactions,
+            messageRepository: repositories.messages,
+            conversationRepository: repositories.conversations
+        }),
+        friendRequests: new FriendRequestService({
+            friendRequestRepository: repositories.friendRequests,
+            userRepository: repositories.users,
+            notificationRepository: repositories.notifications
+        }),
+        notifications: new NotificationService({
+            notificationRepository: repositories.notifications,
             userRepository: repositories.users
         }),
         admin: new AdminService(models)
@@ -204,6 +245,10 @@ async function startServer() {
     registerAuthRoutes(router, ctx);
     registerUserRoutes(router, ctx);
     registerMessageRoutes(router, ctx);
+    registerAttachmentRoutes(router, ctx);
+    registerReactionRoutes(router, ctx);
+    registerFriendRequestRoutes(router, ctx);
+    registerNotificationRoutes(router, ctx);
     registerAdminRoutes(router, ctx);
 
     const server = http.createServer(async (req, res) => {

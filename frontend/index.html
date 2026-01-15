@@ -128,6 +128,18 @@
                     <label>Message
                         <textarea id="messageContent" rows="3" required></textarea>
                     </label>
+                    <label>Attachment URL
+                        <input type="url" id="messageAttachmentUrl" placeholder="https://..." />
+                    </label>
+                    <label>Attachment File Name
+                        <input type="text" id="messageAttachmentName" placeholder="file.pdf" />
+                    </label>
+                    <label>Attachment MIME Type
+                        <input type="text" id="messageAttachmentType" placeholder="application/pdf" />
+                    </label>
+                    <label>Attachment Size (bytes)
+                        <input type="number" id="messageAttachmentSize" min="0" />
+                    </label>
                     <div class="actions">
                         <button type="submit">Send</button>
                     </div>
@@ -171,6 +183,105 @@
                     <p class="hint" id="adminHint"></p>
                 </form>
                 <div class="admin-list" id="adminList"></div>
+            </section>
+
+            <section class="panel" id="friendsPanel">
+                <div class="panel-header">
+                    <h2>Friend Requests</h2>
+                    <button id="btnRefreshFriends" class="ghost">Refresh</button>
+                </div>
+                <form id="friendRequestForm">
+                    <label>Receiver User Id
+                        <input type="text" id="friendReceiverId" required />
+                    </label>
+                    <div class="actions">
+                        <button type="submit">Send Request</button>
+                    </div>
+                    <p class="hint" id="friendRequestHint"></p>
+                </form>
+                <div class="request-list" id="friendRequestList"></div>
+            </section>
+
+            <section class="panel" id="notificationsPanel">
+                <div class="panel-header">
+                    <h2>Notifications</h2>
+                    <button id="btnRefreshNotifications" class="ghost">Refresh</button>
+                </div>
+                <form id="notificationForm">
+                    <label>User Id
+                        <input type="text" id="notificationUserId" required />
+                    </label>
+                    <label>Type
+                        <input type="text" id="notificationType" placeholder="Message" required />
+                    </label>
+                    <label>Payload (JSON)
+                        <textarea id="notificationPayload" rows="4" placeholder="{ }"></textarea>
+                    </label>
+                    <div class="actions">
+                        <button type="submit">Create</button>
+                    </div>
+                    <p class="hint" id="notificationHint"></p>
+                </form>
+                <div class="notification-list" id="notificationList"></div>
+            </section>
+
+            <section class="panel" id="attachmentsPanel">
+                <div class="panel-header">
+                    <h2>Attachments</h2>
+                    <button id="btnRefreshAttachments" class="ghost">Refresh</button>
+                </div>
+                <form id="attachmentForm">
+                    <label>Message Id
+                        <input type="text" id="attachmentMessageId" required />
+                    </label>
+                    <label>Attachment Id
+                        <input type="text" id="attachmentId" placeholder="For update/delete" />
+                    </label>
+                    <label>URL
+                        <input type="url" id="attachmentUrl" placeholder="https://..." />
+                    </label>
+                    <label>File Name
+                        <input type="text" id="attachmentName" placeholder="file.pdf" />
+                    </label>
+                    <label>MIME Type
+                        <input type="text" id="attachmentType" placeholder="application/pdf" />
+                    </label>
+                    <label>Size (bytes)
+                        <input type="number" id="attachmentSize" min="0" />
+                    </label>
+                    <div class="actions">
+                        <button type="button" id="attachmentCreate">Create</button>
+                        <button type="button" id="attachmentUpdate" class="ghost">Update</button>
+                        <button type="button" id="attachmentDelete" class="ghost danger">Delete</button>
+                    </div>
+                    <p class="hint" id="attachmentHint"></p>
+                </form>
+                <div class="attachment-list" id="attachmentList"></div>
+            </section>
+
+            <section class="panel" id="reactionsPanel">
+                <div class="panel-header">
+                    <h2>Reactions</h2>
+                    <button id="btnRefreshReactions" class="ghost">Refresh</button>
+                </div>
+                <form id="reactionForm">
+                    <label>Message Id
+                        <input type="text" id="reactionMessageId" required />
+                    </label>
+                    <label>Reaction Id
+                        <input type="text" id="reactionId" placeholder="For update/delete" />
+                    </label>
+                    <label>Emoji
+                        <input type="text" id="reactionEmoji" placeholder=":+1:" />
+                    </label>
+                    <div class="actions">
+                        <button type="button" id="reactionCreate">Create</button>
+                        <button type="button" id="reactionUpdate" class="ghost">Update</button>
+                        <button type="button" id="reactionDelete" class="ghost danger">Delete</button>
+                    </div>
+                    <p class="hint" id="reactionHint"></p>
+                </form>
+                <div class="reaction-list" id="reactionList"></div>
             </section>
         </main>
     </div>

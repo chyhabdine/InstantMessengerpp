@@ -3,6 +3,7 @@
 let authMode = "login"; // or "register"
 let authToken = localStorage.getItem("im_token") || "";
 let currentChatId = null;
+let currentUserId = null;
 
 const els = {
     btnShowLogin: document.getElementById("btnShowLogin"),
@@ -40,6 +41,10 @@ const els = {
     messageList: document.getElementById("messageList"),
     messageForm: document.getElementById("messageForm"),
     messageContent: document.getElementById("messageContent"),
+    messageAttachmentUrl: document.getElementById("messageAttachmentUrl"),
+    messageAttachmentName: document.getElementById("messageAttachmentName"),
+    messageAttachmentType: document.getElementById("messageAttachmentType"),
+    messageAttachmentSize: document.getElementById("messageAttachmentSize"),
     messageHint: document.getElementById("messageHint"),
     btnRefreshMessages: document.getElementById("btnRefreshMessages"),
     userSearchForm: document.getElementById("userSearchForm"),
@@ -54,7 +59,42 @@ const els = {
     adminDelete: document.getElementById("adminDelete"),
     adminList: document.getElementById("adminList"),
     adminHint: document.getElementById("adminHint"),
-    btnRefreshAdmin: document.getElementById("btnRefreshAdmin")
+    btnRefreshAdmin: document.getElementById("btnRefreshAdmin"),
+    friendRequestForm: document.getElementById("friendRequestForm"),
+    friendReceiverId: document.getElementById("friendReceiverId"),
+    friendRequestList: document.getElementById("friendRequestList"),
+    friendRequestHint: document.getElementById("friendRequestHint"),
+    btnRefreshFriends: document.getElementById("btnRefreshFriends"),
+    notificationForm: document.getElementById("notificationForm"),
+    notificationUserId: document.getElementById("notificationUserId"),
+    notificationType: document.getElementById("notificationType"),
+    notificationPayload: document.getElementById("notificationPayload"),
+    notificationList: document.getElementById("notificationList"),
+    notificationHint: document.getElementById("notificationHint"),
+    btnRefreshNotifications: document.getElementById("btnRefreshNotifications"),
+    attachmentForm: document.getElementById("attachmentForm"),
+    attachmentMessageId: document.getElementById("attachmentMessageId"),
+    attachmentId: document.getElementById("attachmentId"),
+    attachmentUrl: document.getElementById("attachmentUrl"),
+    attachmentName: document.getElementById("attachmentName"),
+    attachmentType: document.getElementById("attachmentType"),
+    attachmentSize: document.getElementById("attachmentSize"),
+    attachmentCreate: document.getElementById("attachmentCreate"),
+    attachmentUpdate: document.getElementById("attachmentUpdate"),
+    attachmentDelete: document.getElementById("attachmentDelete"),
+    attachmentList: document.getElementById("attachmentList"),
+    attachmentHint: document.getElementById("attachmentHint"),
+    btnRefreshAttachments: document.getElementById("btnRefreshAttachments"),
+    reactionForm: document.getElementById("reactionForm"),
+    reactionMessageId: document.getElementById("reactionMessageId"),
+    reactionId: document.getElementById("reactionId"),
+    reactionEmoji: document.getElementById("reactionEmoji"),
+    reactionCreate: document.getElementById("reactionCreate"),
+    reactionUpdate: document.getElementById("reactionUpdate"),
+    reactionDelete: document.getElementById("reactionDelete"),
+    reactionList: document.getElementById("reactionList"),
+    reactionHint: document.getElementById("reactionHint"),
+    btnRefreshReactions: document.getElementById("btnRefreshReactions")
 };
 
 function setAuthMode(mode) {
@@ -139,11 +179,28 @@ function renderMessages(messages) {
     messages.forEach(msg => {
         const item = document.createElement("div");
         item.className = "message-item";
+        const attachmentsHtml = (msg.attachments || []).map(att => {
+            const name = att.fileName || "attachment";
+            return `<div class="muted">${name} (${att.size || 0} bytes)</div>`;
+        }).join("");
         item.innerHTML = `
             <div class="message-author">${msg.senderName}</div>
             <div class="message-content">${msg.content}</div>
+            ${attachmentsHtml ? `<div class="stack">${attachmentsHtml}</div>` : ""}
             <div class="message-time">${new Date(msg.sentAt).toLocaleString()}</div>
         `;
+        const actionRow = document.createElement("div");
+        actionRow.className = "inline-actions";
+        const reactBtn = document.createElement("button");
+        reactBtn.className = "ghost";
+        reactBtn.textContent = "React";
+        reactBtn.onclick = () => {
+            els.reactionMessageId.value = msg.id;
+            els.reactionEmoji.focus();
+            loadReactions();
+        };
+        actionRow.appendChild(reactBtn);
+        item.appendChild(actionRow);
         els.messageList.appendChild(item);
     });
     els.messageList.scrollTop = els.messageList.scrollHeight;
@@ -152,6 +209,7 @@ function renderMessages(messages) {
 async function loadProfile() {
     try {
         const profile = await apiFetch("/users/me");
+        currentUserId = profile.userId;
         els.profileEmail.textContent = profile.email;
         els.profileUserName.textContent = profile.userName;
         els.profileDisplay.textContent = profile.displayName;
@@ -162,6 +220,9 @@ async function loadProfile() {
         els.profileAvatarInput.value = profile.avatarUrl || "";
         els.profileStatusInput.value = profile.statusMessage || "";
         els.profilePresenceInput.value = profile.presence || "Online";
+        if (els.notificationUserId) {
+            els.notificationUserId.value = profile.userId;
+        }
     } catch (err) {
         console.error(err);
     }
@@ -357,6 +418,392 @@ async function deleteAdminItem() {
     }
 }
 
+function parseJsonPayload(raw, fallback = {}) {
+    if (!raw) return fallback;
+    try {
+        return JSON.parse(raw);
+    } catch {
+        throw new Error("Invalid JSON payload.");
+    }
+}
+
+function renderFriendRequests(requests) {
+    els.friendRequestList.innerHTML = "";
+    if (!requests || requests.length === 0) {
+        els.friendRequestList.innerHTML = "<div class='hint'>No requests.</div>";
+        return;
+    }
+    requests.forEach(req => {
+        const item = document.createElement("div");
+        item.className = "request-item";
+        item.innerHTML = `
+            <div><strong>Status:</strong> ${req.status}</div>
+            <div class="muted">Requester: ${req.requesterId}</div>
+            <div class="muted">Receiver: ${req.receiverId}</div>
+        `;
+        const actions = document.createElement("div");
+        actions.className = "inline-actions";
+        if (req.receiverId === currentUserId && req.status === "Pending") {
+            const acceptBtn = document.createElement("button");
+            acceptBtn.textContent = "Accept";
+            acceptBtn.onclick = () => updateFriendRequest(req.id, "Accepted");
+            const rejectBtn = document.createElement("button");
+            rejectBtn.className = "ghost";
+            rejectBtn.textContent = "Reject";
+            rejectBtn.onclick = () => updateFriendRequest(req.id, "Rejected");
+            actions.appendChild(acceptBtn);
+            actions.appendChild(rejectBtn);
+        }
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "ghost danger";
+        deleteBtn.textContent = "Delete";
+        deleteBtn.onclick = () => deleteFriendRequest(req.id);
+        actions.appendChild(deleteBtn);
+        item.appendChild(actions);
+        els.friendRequestList.appendChild(item);
+    });
+}
+
+async function loadFriendRequests() {
+    els.friendRequestHint.textContent = "";
+    try {
+        const requests = await apiFetch("/friends/requests");
+        renderFriendRequests(requests);
+    } catch (err) {
+        els.friendRequestHint.textContent = err.message;
+    }
+}
+
+async function createFriendRequest() {
+    els.friendRequestHint.textContent = "Sending...";
+    try {
+        const receiverId = els.friendReceiverId.value.trim();
+        await apiFetch("/friends/requests", {
+            method: "POST",
+            body: JSON.stringify({ receiverId })
+        });
+        els.friendReceiverId.value = "";
+        els.friendRequestHint.textContent = "Request sent.";
+        await loadFriendRequests();
+    } catch (err) {
+        els.friendRequestHint.textContent = err.message;
+    }
+}
+
+async function updateFriendRequest(requestId, status) {
+    try {
+        await apiFetch(`/friends/requests/${requestId}`, {
+            method: "PUT",
+            body: JSON.stringify({ status })
+        });
+        await loadFriendRequests();
+        await loadNotifications();
+    } catch (err) {
+        els.friendRequestHint.textContent = err.message;
+    }
+}
+
+async function deleteFriendRequest(requestId) {
+    try {
+        await apiFetch(`/friends/requests/${requestId}`, { method: "DELETE" });
+        await loadFriendRequests();
+    } catch (err) {
+        els.friendRequestHint.textContent = err.message;
+    }
+}
+
+function renderNotifications(notifications) {
+    els.notificationList.innerHTML = "";
+    if (!notifications || notifications.length === 0) {
+        els.notificationList.innerHTML = "<div class='hint'>No notifications.</div>";
+        return;
+    }
+    notifications.forEach(note => {
+        const item = document.createElement("div");
+        item.className = "notification-item";
+        item.innerHTML = `
+            <div><strong>${note.type}</strong> - ${note.isRead ? "Read" : "Unread"}</div>
+            <div class="muted">${note.payload}</div>
+        `;
+        const actions = document.createElement("div");
+        actions.className = "inline-actions";
+        const readBtn = document.createElement("button");
+        readBtn.className = "ghost";
+        readBtn.textContent = "Mark Read";
+        readBtn.onclick = () => updateNotification(note.id, { isRead: true });
+        const delBtn = document.createElement("button");
+        delBtn.className = "ghost danger";
+        delBtn.textContent = "Delete";
+        delBtn.onclick = () => deleteNotification(note.id);
+        actions.appendChild(readBtn);
+        actions.appendChild(delBtn);
+        item.appendChild(actions);
+        els.notificationList.appendChild(item);
+    });
+}
+
+async function loadNotifications() {
+    els.notificationHint.textContent = "";
+    try {
+        const notifications = await apiFetch("/notifications");
+        renderNotifications(notifications);
+    } catch (err) {
+        els.notificationHint.textContent = err.message;
+    }
+}
+
+async function createNotification() {
+    els.notificationHint.textContent = "Creating...";
+    try {
+        const payload = parseJsonPayload(els.notificationPayload.value.trim(), {});
+        await apiFetch("/notifications", {
+            method: "POST",
+            body: JSON.stringify({
+                userId: els.notificationUserId.value.trim(),
+                type: els.notificationType.value.trim(),
+                payload
+            })
+        });
+        els.notificationHint.textContent = "Created.";
+        await loadNotifications();
+    } catch (err) {
+        els.notificationHint.textContent = err.message;
+    }
+}
+
+async function updateNotification(notificationId, data) {
+    try {
+        await apiFetch(`/notifications/${notificationId}`, {
+            method: "PUT",
+            body: JSON.stringify(data)
+        });
+        await loadNotifications();
+    } catch (err) {
+        els.notificationHint.textContent = err.message;
+    }
+}
+
+async function deleteNotification(notificationId) {
+    try {
+        await apiFetch(`/notifications/${notificationId}`, { method: "DELETE" });
+        await loadNotifications();
+    } catch (err) {
+        els.notificationHint.textContent = err.message;
+    }
+}
+
+function renderAttachments(attachments) {
+    els.attachmentList.innerHTML = "";
+    if (!attachments || attachments.length === 0) {
+        els.attachmentList.innerHTML = "<div class='hint'>No attachments.</div>";
+        return;
+    }
+    attachments.forEach(att => {
+        const item = document.createElement("div");
+        item.className = "attachment-item";
+        item.innerHTML = `
+            <div><strong>${att.fileName || "attachment"}</strong></div>
+            <div class="muted">${att.url}</div>
+            <div class="muted">${att.mimeType} - ${att.size || 0} bytes</div>
+            <div class="muted">Id: ${att.id}</div>
+        `;
+        const actions = document.createElement("div");
+        actions.className = "inline-actions";
+        const useBtn = document.createElement("button");
+        useBtn.className = "ghost";
+        useBtn.textContent = "Use";
+        useBtn.onclick = () => {
+            els.attachmentId.value = att.id;
+            els.attachmentMessageId.value = att.messageId;
+            els.attachmentUrl.value = att.url;
+            els.attachmentName.value = att.fileName;
+            els.attachmentType.value = att.mimeType;
+            els.attachmentSize.value = att.size;
+        };
+        actions.appendChild(useBtn);
+        item.appendChild(actions);
+        els.attachmentList.appendChild(item);
+    });
+}
+
+async function loadAttachments() {
+    els.attachmentHint.textContent = "";
+    const messageId = els.attachmentMessageId.value.trim();
+    if (!messageId) {
+        els.attachmentHint.textContent = "Message id is required.";
+        return;
+    }
+    try {
+        const attachments = await apiFetch(`/messages/${messageId}/attachments`);
+        renderAttachments(attachments);
+    } catch (err) {
+        els.attachmentHint.textContent = err.message;
+    }
+}
+
+async function createAttachment() {
+    els.attachmentHint.textContent = "Creating...";
+    const messageId = els.attachmentMessageId.value.trim();
+    if (!messageId) {
+        els.attachmentHint.textContent = "Message id is required.";
+        return;
+    }
+    try {
+        await apiFetch(`/messages/${messageId}/attachments`, {
+            method: "POST",
+            body: JSON.stringify({
+                url: els.attachmentUrl.value.trim(),
+                fileName: els.attachmentName.value.trim(),
+                mimeType: els.attachmentType.value.trim(),
+                size: Number(els.attachmentSize.value || 0)
+            })
+        });
+        els.attachmentHint.textContent = "Created.";
+        await loadAttachments();
+    } catch (err) {
+        els.attachmentHint.textContent = err.message;
+    }
+}
+
+async function updateAttachment() {
+    els.attachmentHint.textContent = "Updating...";
+    const attachmentId = els.attachmentId.value.trim();
+    if (!attachmentId) {
+        els.attachmentHint.textContent = "Attachment id is required.";
+        return;
+    }
+    try {
+        await apiFetch(`/attachments/${attachmentId}`, {
+            method: "PUT",
+            body: JSON.stringify({
+                url: els.attachmentUrl.value.trim(),
+                fileName: els.attachmentName.value.trim(),
+                mimeType: els.attachmentType.value.trim(),
+                size: Number(els.attachmentSize.value || 0)
+            })
+        });
+        els.attachmentHint.textContent = "Updated.";
+        await loadAttachments();
+    } catch (err) {
+        els.attachmentHint.textContent = err.message;
+    }
+}
+
+async function deleteAttachment() {
+    els.attachmentHint.textContent = "Deleting...";
+    const attachmentId = els.attachmentId.value.trim();
+    if (!attachmentId) {
+        els.attachmentHint.textContent = "Attachment id is required.";
+        return;
+    }
+    try {
+        await apiFetch(`/attachments/${attachmentId}`, { method: "DELETE" });
+        els.attachmentHint.textContent = "Deleted.";
+        await loadAttachments();
+    } catch (err) {
+        els.attachmentHint.textContent = err.message;
+    }
+}
+
+function renderReactions(reactions) {
+    els.reactionList.innerHTML = "";
+    if (!reactions || reactions.length === 0) {
+        els.reactionList.innerHTML = "<div class='hint'>No reactions.</div>";
+        return;
+    }
+    reactions.forEach(reaction => {
+        const item = document.createElement("div");
+        item.className = "reaction-item";
+        item.innerHTML = `
+            <div><strong>${reaction.emoji}</strong></div>
+            <div class="muted">User: ${reaction.userId}</div>
+            <div class="muted">Id: ${reaction.id}</div>
+        `;
+        const actions = document.createElement("div");
+        actions.className = "inline-actions";
+        const useBtn = document.createElement("button");
+        useBtn.className = "ghost";
+        useBtn.textContent = "Use";
+        useBtn.onclick = () => {
+            els.reactionId.value = reaction.id;
+            els.reactionMessageId.value = reaction.messageId;
+            els.reactionEmoji.value = reaction.emoji;
+        };
+        actions.appendChild(useBtn);
+        item.appendChild(actions);
+        els.reactionList.appendChild(item);
+    });
+}
+
+async function loadReactions() {
+    els.reactionHint.textContent = "";
+    const messageId = els.reactionMessageId.value.trim();
+    if (!messageId) {
+        els.reactionHint.textContent = "Message id is required.";
+        return;
+    }
+    try {
+        const reactions = await apiFetch(`/messages/${messageId}/reactions`);
+        renderReactions(reactions);
+    } catch (err) {
+        els.reactionHint.textContent = err.message;
+    }
+}
+
+async function createReaction() {
+    els.reactionHint.textContent = "Creating...";
+    const messageId = els.reactionMessageId.value.trim();
+    if (!messageId) {
+        els.reactionHint.textContent = "Message id is required.";
+        return;
+    }
+    try {
+        await apiFetch(`/messages/${messageId}/reactions`, {
+            method: "POST",
+            body: JSON.stringify({ emoji: els.reactionEmoji.value.trim() })
+        });
+        els.reactionHint.textContent = "Created.";
+        await loadReactions();
+    } catch (err) {
+        els.reactionHint.textContent = err.message;
+    }
+}
+
+async function updateReaction() {
+    els.reactionHint.textContent = "Updating...";
+    const reactionId = els.reactionId.value.trim();
+    if (!reactionId) {
+        els.reactionHint.textContent = "Reaction id is required.";
+        return;
+    }
+    try {
+        await apiFetch(`/reactions/${reactionId}`, {
+            method: "PUT",
+            body: JSON.stringify({ emoji: els.reactionEmoji.value.trim() })
+        });
+        els.reactionHint.textContent = "Updated.";
+        await loadReactions();
+    } catch (err) {
+        els.reactionHint.textContent = err.message;
+    }
+}
+
+async function deleteReaction() {
+    els.reactionHint.textContent = "Deleting...";
+    const reactionId = els.reactionId.value.trim();
+    if (!reactionId) {
+        els.reactionHint.textContent = "Reaction id is required.";
+        return;
+    }
+    try {
+        await apiFetch(`/reactions/${reactionId}`, { method: "DELETE" });
+        els.reactionHint.textContent = "Deleted.";
+        await loadReactions();
+    } catch (err) {
+        els.reactionHint.textContent = err.message;
+    }
+}
+
 function resetAuthForms() {
     els.authEmail.value = "";
     els.authPassword.value = "";
@@ -368,12 +815,23 @@ function resetAuthForms() {
 function logout() {
     setToken("");
     currentChatId = null;
+    currentUserId = null;
     resetAuthForms();
     els.chatList.innerHTML = "";
     els.messageList.innerHTML = "";
     els.profileHint.textContent = "";
     els.messageHint.textContent = "";
     els.chatHint.textContent = "";
+    els.adminList.innerHTML = "";
+    els.adminHint.textContent = "";
+    els.friendRequestList.innerHTML = "";
+    els.friendRequestHint.textContent = "";
+    els.notificationList.innerHTML = "";
+    els.notificationHint.textContent = "";
+    els.attachmentList.innerHTML = "";
+    els.attachmentHint.textContent = "";
+    els.reactionList.innerHTML = "";
+    els.reactionHint.textContent = "";
 }
 
 // Event bindings
@@ -404,6 +862,8 @@ els.authForm.onsubmit = async (e) => {
         await loadProfile();
         await loadChats();
         await loadAdminList();
+        await loadFriendRequests();
+        await loadNotifications();
     } catch (err) {
         els.authHint.textContent = err.message;
     }
@@ -464,15 +924,30 @@ els.messageForm.onsubmit = async (e) => {
         return;
     }
     try {
+        const attachments = [];
+        const attachmentUrl = els.messageAttachmentUrl.value.trim();
+        if (attachmentUrl) {
+            attachments.push({
+                url: attachmentUrl,
+                fileName: els.messageAttachmentName.value.trim() || "attachment",
+                mimeType: els.messageAttachmentType.value.trim() || "application/octet-stream",
+                size: Number(els.messageAttachmentSize.value || 0)
+            });
+        }
         await apiFetch(`/chats/${currentChatId}/messages`, {
             method: "POST",
             body: JSON.stringify({
                 content: els.messageContent.value.trim(),
-                attachments: []
+                attachments
             })
         });
         els.messageContent.value = "";
+        els.messageAttachmentUrl.value = "";
+        els.messageAttachmentName.value = "";
+        els.messageAttachmentType.value = "";
+        els.messageAttachmentSize.value = "";
         await loadMessages(currentChatId);
+        await loadNotifications();
     } catch (err) {
         els.messageHint.textContent = err.message;
     }
@@ -491,6 +966,24 @@ els.btnRefreshAdmin.onclick = () => loadAdminList();
 els.adminCreate.onclick = () => createAdminItem();
 els.adminUpdate.onclick = () => updateAdminItem();
 els.adminDelete.onclick = () => deleteAdminItem();
+els.btnRefreshFriends.onclick = () => loadFriendRequests();
+els.friendRequestForm.onsubmit = (e) => {
+    e.preventDefault();
+    createFriendRequest();
+};
+els.btnRefreshNotifications.onclick = () => loadNotifications();
+els.notificationForm.onsubmit = (e) => {
+    e.preventDefault();
+    createNotification();
+};
+els.btnRefreshAttachments.onclick = () => loadAttachments();
+els.attachmentCreate.onclick = () => createAttachment();
+els.attachmentUpdate.onclick = () => updateAttachment();
+els.attachmentDelete.onclick = () => deleteAttachment();
+els.btnRefreshReactions.onclick = () => loadReactions();
+els.reactionCreate.onclick = () => createReaction();
+els.reactionUpdate.onclick = () => updateReaction();
+els.reactionDelete.onclick = () => deleteReaction();
 
 // Init
 setAuthMode(authMode);
@@ -498,6 +991,8 @@ if (authToken) {
     loadProfile();
     loadChats();
     loadAdminList();
+    loadFriendRequests();
+    loadNotifications();
 }
 
 

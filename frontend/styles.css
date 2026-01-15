@@ -237,6 +237,45 @@ button.danger {
     font-size: 12px;
 }
 
+.muted {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.request-list,
+.notification-list,
+.attachment-list,
+.reaction-list {
+    background: #0b1220;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    min-height: 160px;
+    max-height: 320px;
+    overflow: auto;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.request-item,
+.notification-item,
+.attachment-item,
+.reaction-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.02);
+    display: grid;
+    gap: 6px;
+}
+
+.inline-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .admin-list {
     background: #0b1220;
     border: 1px solid var(--border);

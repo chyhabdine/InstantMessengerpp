@@ -7,6 +7,10 @@ class MessageRepository {
         return this.Message.findAll({ where: { conversationId }, order: [["timestamp", "ASC"]] });
     }
 
+    async findById(id) {
+        return this.Message.findByPk(id);
+    }
+
     async create(messageData) {
         return this.Message.create(messageData);
     }

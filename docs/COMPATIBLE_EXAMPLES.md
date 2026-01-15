@@ -66,3 +66,61 @@ Response:
   { "id": "role-id", "name": "User" }
 ]
 ```
+
+## Friend Requests
+Request:
+```
+POST /api/friends/requests
+Authorization: Bearer <token>
+{
+  "receiverId": "user-id"
+}
+```
+Response:
+```
+{ "id": "request-id", "requesterId": "me", "receiverId": "user-id", "status": "Pending" }
+```
+
+## Message Attachments
+Request:
+```
+POST /api/messages/{id}/attachments
+Authorization: Bearer <token>
+{
+  "url": "https://example.com/file.pdf",
+  "fileName": "file.pdf",
+  "mimeType": "application/pdf",
+  "size": 1200
+}
+```
+Response:
+```
+{ "id": "attachment-id", "messageId": "message-id", "url": "https://example.com/file.pdf" }
+```
+
+## Reactions
+Request:
+```
+POST /api/messages/{id}/reactions
+Authorization: Bearer <token>
+{
+  "emoji": ":+1:"
+}
+```
+Response:
+```
+{ "id": "reaction-id", "messageId": "message-id", "userId": "me", "emoji": ":+1:" }
+```
+
+## Notifications
+Request:
+```
+GET /api/notifications
+Authorization: Bearer <token>
+```
+Response:
+```
+[
+  { "id": "notification-id", "type": "Message", "payload": "{\"messageId\":\"...\"}", "isRead": false }
+]
+```

@@ -49,6 +49,9 @@ Instant messaging web application (client-server) with a Node.js backend + Postg
 - Register/Login (buttons at the top), then the app loads your profile and conversations.
 - Create a conversation (private or group), select a chat, send messages.
 - Edit profile (display, avatar URL, status, presence) in the Profile panel.
+- Use Friend Requests to send/accept/reject requests.
+- Use Notifications to review and mark notifications as read.
+- Use Attachments and Reactions panels to manage message attachments and reactions.
 - Use the Admin Console panel to manage all entities (CRUD).
 - Requests use the REST API (`Authorization: Bearer <token>`).
 
